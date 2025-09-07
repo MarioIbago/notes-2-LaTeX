@@ -1,4 +1,4 @@
-# app.py — Foto2LaTeX (solo FÓRMULAS → LaTeX)
+# app.py — Foto2LaTeX (solo FÓRMULAS → LaTeX) con descargas
 # Requisitos: streamlit, openai, pillow
 # Configura tu clave en:
 #  - Variable de entorno: OPENAI_API_KEY
@@ -21,7 +21,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Fondo claro uniforme
 st.markdown(
     """
     <style>
@@ -77,7 +76,7 @@ def extract_latex_from_image(uploaded_file):
                                 "- No agregues comentarios ni explicaciones.\n"
                             ),
                         },
-                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}" }},
+                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}},
                     ],
                 }
             ],
@@ -88,7 +87,24 @@ def extract_latex_from_image(uploaded_file):
         return None
 
 # ------------------------------
-# E) Interfaz
+# E) Helper: documento LaTeX compilable
+# ------------------------------
+def build_compilable_document(snippet: str) -> str:
+    """Envuelve el snippet en un .tex completo y compilable (no modifica el snippet)."""
+    return (
+        "\\documentclass{article}\n"
+        "\\usepackage[utf8]{inputenc}\n"
+        "\\usepackage[T1]{fontenc}\n"
+        "\\usepackage{lmodern}\n"
+        "\\usepackage{amsmath,amssymb}\n"
+        "\\usepackage[margin=2cm]{geometry}\n"
+        "\\begin{document}\n\n"
+        + snippet +
+        "\n\n\\end{document}\n"
+    )
+
+# ------------------------------
+# F) Interfaz
 # ------------------------------
 st.title("👁️ Foto2LaTeX — Ecuaciones ➜ LaTeX")
 st.markdown(
@@ -123,7 +139,7 @@ with col2:
     st.header("💡 Resultado")
     if "ocr_result" in st.session_state:
         latex_code = st.session_state["ocr_result"]
-        st.markdown("### Código LaTeX")
+        st.markdown("### Código LaTeX (snippet)")
         st.code(latex_code, language="latex")
 
         st.markdown("### Vista previa")
@@ -139,5 +155,24 @@ with col2:
         except Exception:
             st.error("No se pudo renderizar la ecuación LaTeX")
 
+        st.markdown("### Descargas")
+        st.download_button(
+            label="📥 Descargar snippet (.tex)",
+            data=latex_code.encode("utf-8"),
+            file_name="ecuaciones_snippet.tex",
+            mime="text/plain",
+        )
+        compilable_tex = build_compilable_document(latex_code)
+        st.download_button(
+            label="📥 Descargar documento compilable (.tex)",
+            data=compilable_tex.encode("utf-8"),
+            file_name="ecuaciones_documento.tex",
+            mime="text/plain",
+        )
+
 st.markdown("---")
-st.markdown("**Foto2LaTeX** — Desarrollado por [MarioIbago](https://github.com/MarioIbago) | Usa GPT-4o mini — *no expongas tu API key en el código*.")
+st.markdown(
+    "**Foto2LaTeX** — Desarrollado por "
+    "[MarioIbago](https://github.com/MarioIbago) | Usa GPT-4o mini — "
+    "*no expongas tu API key en el código*."
+)
