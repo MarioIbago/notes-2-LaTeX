@@ -4,6 +4,7 @@ Turn images of **math equations** into **LaTeX** instantly ⚡.
 Upload an image → processed by **GPT-4o-mini** → get clean LaTeX code.  
 Choose between a single formula snippet or a full `.tex` file ready for Overleaf.
 
+https://notes-2-latex.streamlit.app/ 
 ---
 
 ## ✨ Features
